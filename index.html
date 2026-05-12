@@ -1,11 +1,238 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameShare - Sistema de Empréstimos de Jogos</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+
+    <!-- Login Page -->
+    <div id="login-page" class="page active">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="logo">
+                        <svg class="icon-large" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M7 19H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-4l-3 3-3-3z"></path>
+                        </svg>
+                        <h1>GameShare</h1>
+                    </div>
+                    <h2 id="auth-title">Entrar</h2>
+                </div>
+
+                <div id="error-message" class="error-message hidden"></div>
+
+                <form id="auth-form">
+                    <div id="nome-field" class="form-group hidden">
+                        <label>Nome Completo</label>
+                        <input type="text" id="nome" placeholder="Seu nome">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="email" placeholder="seu@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" id="senha" placeholder="••••••••" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">
+                        Entrar
+                    </button>
+                </form>
+
+                <div class="toggle-auth">
+                    <button type="button" id="toggle-auth-btn" class="btn-link">
+                        Não tem conta? Cadastre-se
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="main-app" class="page">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-left">
+                    <div class="nav-logo">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01"></path>
+                        </svg>
+                        <span>GameShare</span>
+                    </div>
+                    <div class="nav-links">
+                        <button class="nav-link active" data-page="dashboard">Início</button>
+                        <button class="nav-link" data-page="catalogo">Catálogo</button>
+                        <button class="nav-link" data-page="emprestimos">Empréstimos</button>
+                    </div>
+                </div>
+                <div class="nav-right">
+                    <button class="nav-link" data-page="perfil">
+                        <span id="nav-user-name">Usuário</span>
+                    </button>
+                    <button id="logout-btn" class="nav-link">Sair</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Content -->
+        <div id="app-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="content-page active">
+                <div class="container">
+                    <div class="page-header">
+                        <h1>Bem-vindo, <span id="welcome-name">Usuário</span>!</h1>
+                        <p>Gerencie seus jogos e empréstimos</p>
+                    </div>
+
+                    <div id="penalty-alert" class="alert alert-danger hidden">
+                        <p>
+                            <span id="penalty-message"></span>
+                            <button class="btn-link-inline" onclick="navigateTo('perfil')">Pagar agora</button>
+                        </p>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3 id="stat-meus-jogos">0</h3>
+                            <p>Meus Jogos</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="stat-emprestimos-ativos">0</h3>
+                            <p>Empréstimos Ativos</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="stat-jogos-disponiveis">0</h3>
+                            <p>Jogos Disponíveis</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="stat-multas-pendentes">0</h3>
+                            <p>Multas Pendentes</p>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Meus Jogos</h2>
+                                <button class="btn btn-primary btn-sm" onclick="navigateTo('perfil')">Adicionar</button>
+                            </div>
+                            <div id="dashboard-meus-jogos"></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Empréstimos Recentes</h2>
+                            </div>
+                            <div id="dashboard-emprestimos"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Catálogo Page -->
+            <div id="catalogo-page" class="content-page">
+                <div class="container">
+                    <div class="page-header">
+                        <h1>Catálogo de Jogos</h1>
+                        <p>Encontre jogos disponíveis para empréstimo</p>
+                    </div>
+
+                    <div id="blocked-alert" class="alert alert-danger hidden">
+                        <p>Sua conta está bloqueada. Você não pode solicitar empréstimos até pagar suas multas.</p>
+                    </div>
+
+                    <div class="search-box">
+                        <input type="text" id="search-jogos" placeholder="Buscar por nome ou categoria...">
+                    </div>
+
+                    <div id="catalogo-jogos" class="games-grid"></div>
+                </div>
+            </div>
+
+            <!-- Empréstimos Page -->
+            <div id="emprestimos-page" class="content-page">
+                <div class="container">
+                    <div class="page-header">
+                        <h1>Meus Empréstimos</h1>
+                        <p>Gerencie seus empréstimos e devoluções</p>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="card">
+                            <h2>Jogos que Peguei Emprestado</h2>
+                            <div id="emprestimos-solicitante"></div>
+                        </div>
+                        <div class="card">
+                            <h2>Jogos que Emprestei</h2>
+                            <div id="emprestimos-dono"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Perfil Page -->
+            <div id="perfil-page" class="content-page">
+                <div class="container">
+                    <div class="card user-card">
+                        <h1 id="perfil-nome">Usuário</h1>
+                        <p id="perfil-email">email@exemplo.com</p>
+                        <span id="perfil-status-badge" class="badge badge-success">Conta Ativa</span>
+                    </div>
+
+                    <div id="perfil-penalidades" class="card hidden">
+                        <h2>Multas Pendentes</h2>
+                        <div id="lista-penalidades"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Meus Jogos (<span id="perfil-total-jogos">0</span>)</h2>
+                            <button class="btn btn-primary btn-sm" onclick="toggleAddJogo()">Adicionar</button>
+                        </div>
+
+                        <div id="add-jogo-form" class="form-container hidden">
+                            <h3>Cadastrar Novo Jogo</h3>
+                            <form id="jogo-form">
+                                <input type="text" id="jogo-nome" placeholder="Nome do jogo" required>
+                                <textarea id="jogo-descricao" placeholder="Descrição" rows="3" required></textarea>
+                                <input type="text" id="jogo-categoria" placeholder="Categoria" required>
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-secondary" onclick="toggleAddJogo()">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Cadastrar</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div id="perfil-jogos" class="games-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="emprestimo-modal" class="modal">
+        <div class="modal-content">
+            <h2>Definir Prazo de Devolução</h2>
+            <form id="emprestimo-form">
+                <label>Data de Devolução</label>
+                <input type="date" id="emprestimo-prazo" required>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEmprestimoModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
