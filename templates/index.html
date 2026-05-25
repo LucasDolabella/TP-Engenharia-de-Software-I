@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Joga Aí – Sistema de Empréstimo de Jogos</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav id="navbar" class="navbar hidden">
+    <div class="nav-brand">🎲 Joga Aí</div>
+    <div class="nav-links">
+      <button onclick="App.mostrarView('jogos')" class="nav-btn">Explorar</button>
+      <button onclick="App.mostrarView('meus-jogos')" class="nav-btn">Meus Jogos</button>
+      <button onclick="App.mostrarView('emprestimos')" class="nav-btn">Empréstimos</button>
+      <button onclick="App.mostrarView('penalidades')" class="nav-btn">Penalidades</button>
+      <div class="nav-notif">
+        <button onclick="App.mostrarView('notificacoes')" class="nav-btn notif-btn">
+          🔔 <span id="notif-badge" class="badge hidden">0</span>
+        </button>
+      </div>
+      <span id="nav-usuario" class="nav-user"></span>
+      <button onclick="App.logout()" class="nav-btn btn-sair">Sair</button>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main id="app">
+
+    <!-- VIEW: AUTH -->
+    <div id="view-auth" class="view">
+      <div class="auth-container">
+        <div class="auth-logo">🎲 Joga Aí</div>
+        <p class="auth-sub">Sistema de Empréstimo de Jogos de Tabuleiro</p>
+        <div class="tabs">
+          <button id="tab-login" class="tab active" onclick="Auth.mostrarLogin()">Entrar</button>
+          <button id="tab-cadastro" class="tab" onclick="Auth.mostrarCadastro()">Cadastrar</button>
+        </div>
+
+        <!-- Login -->
+        <form id="form-login" onsubmit="Auth.login(event)">
+          <input type="email" id="login-email" placeholder="E-mail" required />
+          <input type="password" id="login-senha" placeholder="Senha" required />
+          <button type="submit" class="btn-primary">Entrar</button>
+          <div id="login-erro" class="erro hidden"></div>
+        </form>
+
+        <!-- Cadastro -->
+        <form id="form-cadastro" class="hidden" onsubmit="Auth.cadastrar(event)">
+          <input type="text" id="cad-nome" placeholder="Nome completo" required />
+          <input type="email" id="cad-email" placeholder="E-mail" required />
+          <input type="password" id="cad-senha" placeholder="Senha" required />
+          <button type="submit" class="btn-primary">Criar conta</button>
+          <div id="cad-erro" class="erro hidden"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- VIEW: EXPLORAR JOGOS -->
+    <div id="view-jogos" class="view hidden">
+      <div class="content">
+        <h2>Explorar Jogos</h2>
+        <div class="search-bar">
+          <input type="text" id="busca-input" placeholder="Buscar por nome ou categoria..." oninput="Jogos.buscar()" />
+        </div>
+        <div id="jogos-lista" class="jogos-grid"></div>
+      </div>
+    </div>
+
+    <!-- VIEW: MEUS JOGOS -->
+    <div id="view-meus-jogos" class="view hidden">
+      <div class="content">
+        <div class="section-header">
+          <h2>Meus Jogos</h2>
+          <button class="btn-primary" onclick="MeusJogos.mostrarForm()">+ Adicionar Jogo</button>
+        </div>
+
+        <!-- Formulário de cadastro/edição -->
+        <div id="form-jogo-container" class="card hidden">
+          <h3 id="form-jogo-titulo">Novo Jogo</h3>
+          <form id="form-jogo" onsubmit="MeusJogos.salvar(event)">
+            <input type="hidden" id="jogo-edit-id" />
+            <input type="text" id="jogo-nome" placeholder="Nome do jogo" required />
+            <select id="jogo-categoria" required>
+              <option value="">Selecione a categoria</option>
+              <option value="Estratégia">Estratégia</option>
+              <option value="Cooperativo">Cooperativo</option>
+              <option value="Familia">Família</option>
+              <option value="Cartas">Cartas</option>
+              <option value="RPG">RPG</option>
+              <option value="Party">Party</option>
+              <option value="Outro">Outro</option>
+            </select>
+            <textarea id="jogo-descricao" placeholder="Descrição do jogo" required rows="3"></textarea>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary">Salvar</button>
+              <button type="button" class="btn-secondary" onclick="MeusJogos.cancelar()">Cancelar</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="meus-jogos-lista" class="jogos-grid"></div>
+      </div>
+    </div>
+
+    <!-- VIEW: EMPRÉSTIMOS -->
+    <div id="view-emprestimos" class="view hidden">
+      <div class="content">
+        <h2>Meus Empréstimos</h2>
+        <div id="emprestimos-lista"></div>
+      </div>
+    </div>
+
+    <!-- VIEW: CHAT -->
+    <div id="view-chat" class="view hidden">
+      <div class="content chat-container">
+        <div class="chat-header">
+          <button onclick="App.mostrarView('emprestimos')" class="btn-back">← Voltar</button>
+          <h3 id="chat-titulo">Chat</h3>
+        </div>
+        <div id="chat-mensagens" class="chat-messages"></div>
+        <form id="form-chat" onsubmit="Chat.enviar(event)" class="chat-input">
+          <input type="text" id="chat-conteudo" placeholder="Digite sua mensagem..." autocomplete="off" />
+          <button type="submit" class="btn-primary">Enviar</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- VIEW: PENALIDADES -->
+    <div id="view-penalidades" class="view hidden">
+      <div class="content">
+        <h2>Minhas Penalidades</h2>
+        <div id="penalidades-lista"></div>
+      </div>
+    </div>
+
+    <!-- VIEW: NOTIFICAÇÕES -->
+    <div id="view-notificacoes" class="view hidden">
+      <div class="content">
+        <div class="section-header">
+          <h2>Notificações</h2>
+          <button class="btn-secondary" onclick="Notificacoes.marcarTodasLidas()">Marcar todas como lidas</button>
+        </div>
+        <div id="notificacoes-lista"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL: Solicitar Empréstimo -->
+  <div id="modal-emprestimo" class="modal hidden">
+    <div class="modal-content">
+      <h3>Solicitar Empréstimo</h3>
+      <p id="modal-jogo-nome"></p>
+      <form onsubmit="Jogos.confirmarEmprestimo(event)">
+        <input type="hidden" id="modal-jogo-id" />
+        <label>Data de devolução:</label>
+        <input type="date" id="modal-data-prazo" required />
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Confirmar</button>
+          <button type="button" class="btn-secondary" onclick="App.fecharModal()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- OVERLAY -->
+  <div id="modal-overlay" class="modal-overlay hidden" onclick="App.fecharModal()"></div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/jogos.js"></script>
+  <script src="/static/js/emprestimos.js"></script>
+  <script src="/static/js/chat.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
